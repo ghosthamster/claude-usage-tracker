@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Claude Usage</h1>
+      <button id="refresh" title="Refresh">&#x21bb;</button>
+    </header>
+
+    <section id="bars"><!-- usage bars injected here --></section>
+
+    <p id="empty" class="hidden">
+      No data yet. Open
+      <a href="https://claude.ai/settings/usage" target="_blank" rel="noreferrer">claude.ai/settings/usage</a>
+      once so the extension can read your usage.
+    </p>
+
+    <footer>
+      <span id="updated"></span>
+      <span id="source"></span>
+    </footer>
+    <div id="error" class="hidden">
+      <p id="error-msg"></p>
+      <a id="open-claude" href="https://claude.ai/settings/usage" target="_blank" rel="noreferrer">
+        Open Claude usage page &rarr;
+      </a>
+    </div>
+
+    <script src="../usage-parse.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
