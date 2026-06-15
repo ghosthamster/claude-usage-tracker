@@ -15,7 +15,9 @@ zip -r "$out" \
   content.js \
   interceptor.js \
   usage-parse.js \
+  settings.js \
   popup \
+  options \
   icons \
   -x '*.DS_Store' >/dev/null
 

@@ -3,6 +3,7 @@
   --fg: #f5f3ee;
   --muted: #a8a399;
   --accent: #6645d8;
+  --caution: #d08700;
   --warn: #cc3333;
   --track: #34302a;
 }
@@ -21,11 +22,12 @@ header {
   padding: 12px 14px 6px;
 }
 h1 { font-size: 14px; margin: 0; font-weight: 600; }
-#refresh {
+.actions { display: flex; gap: 2px; }
+.actions button {
   background: none; border: none; color: var(--muted);
   font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 6px;
 }
-#refresh:hover { background: var(--track); color: var(--fg); }
+.actions button:hover { background: var(--track); color: var(--fg); }
 #refresh.spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -36,6 +38,7 @@ section { padding: 4px 14px 8px; }
 .bar .value { color: var(--muted); }
 .bar .track { height: 8px; background: var(--track); border-radius: 4px; overflow: hidden; }
 .bar .fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s; }
+.bar .fill.caution { background: var(--caution); }
 .bar .fill.warn { background: var(--warn); }
 .bar .reset { color: var(--muted); font-size: 11px; margin-top: 3px; }
 

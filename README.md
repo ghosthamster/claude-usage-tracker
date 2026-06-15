@@ -23,10 +23,11 @@ This extension does **not** track you and has **no servers**.
   and 6 minutes). Each poll reads only your own usage endpoint — through an open
   Claude.ai tab when one exists, otherwise via a direct request using your
   existing login. Nothing is ever sent to any third party.
-- **Minimal permissions:** `storage`, `alarms`, `scripting`, and host access to
-  `https://claude.ai/*` only. `scripting` is used solely to read the usage
-  endpoint from an open Claude.ai tab. No `<all_urls>`, no `webRequest`, no `tabs`
-  permission, no access to any site other than Claude.ai.
+- **Minimal permissions:** `storage`, `alarms`, `scripting`, `idle`,
+  `notifications`, and host access to `https://claude.ai/*` only. `scripting`
+  reads the usage endpoint from an open tab; `idle` lets it pause polling while
+  you're away; `notifications` is for the optional limit alert. No `<all_urls>`,
+  no `webRequest`, no `tabs` permission, no access to any site other than Claude.ai.
 
 ## How it works
 
@@ -37,7 +38,25 @@ This extension does **not** track you and has **no servers**.
    highest utilization %.
 3. A randomized ~5-minute timer (and the manual refresh button) re-reads your
    usage — through an open Claude.ai tab if one is available, otherwise via a
-   direct request to your own usage endpoint using your existing login.
+   direct request to your own usage endpoint using your existing login. Polling
+   pauses while your computer is idle and backs off when requests fail.
+
+## Settings
+
+Right-click the toolbar icon → **Options** (or the ⚙ in the popup) to change:
+
+- **Background refresh interval** (minutes, randomized ±15%)
+- **Pause when idle** — skip polls while the computer is idle/locked
+- **Refresh even with no Claude tab open** — turn off to only update while a
+  Claude.ai tab is open (fewest requests)
+- **Notify when a limit reaches N%** — optional alert (0 disables it)
+
+## Development
+
+```bash
+npm test        # runs the usage-parser tests
+./build.sh       # produces the store zip in dist/
+```
 
 ### Components
 

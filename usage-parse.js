@@ -7,18 +7,21 @@
 (function (root) {
   "use strict";
 
+  // Only known buckets are displayed. Unknown keys (internal codenames like
+  // "tangelo", "omelette", "cinder_cove", ...) are ignored so we never surface
+  // confusing internal names in the UI.
   const LABELS = {
     five_hour: "Current session · 5h",
     seven_day: "Weekly · all models",
     seven_day_opus: "Weekly · Opus",
     seven_day_sonnet: "Weekly · Sonnet",
+    seven_day_haiku: "Weekly · Haiku",
     seven_day_cowork: "Weekly · Cowork",
     seven_day_oauth_apps: "Weekly · connected apps",
     extra_usage: "Extra usage",
   };
 
-  const prettify = (s) => String(s).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const labelFor = (key) => LABELS[key] || prettify(key);
+  const labelFor = (key) => LABELS[key];
   const pctText = (u) => `${Math.round(u * 10) / 10}%`;
 
   // Display order: session first, weekly next, extras last, rest in between.
@@ -29,6 +32,7 @@
     const bars = [];
 
     for (const key of Object.keys(data)) {
+      if (!(key in LABELS)) continue; // ignore unknown/internal buckets
       const v = data[key];
       if (!v || typeof v !== "object") continue; // null buckets are skipped
 
