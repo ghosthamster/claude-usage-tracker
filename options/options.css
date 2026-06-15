@@ -1,0 +1,35 @@
+:root {
+  --bg: #1d1b16;
+  --fg: #f5f3ee;
+  --muted: #a8a399;
+  --accent: #6645d8;
+  --track: #34302a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 28px 20px;
+}
+main { max-width: 520px; margin: 0 auto; }
+h1 { font-size: 18px; margin: 0 0 2px; }
+.sub { color: var(--muted); margin: 0 0 20px; font-size: 12px; }
+
+.field { display: block; margin: 18px 0; }
+.field .title { display: block; font-weight: 600; }
+.field .desc { display: block; color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
+.field input[type="number"] {
+  width: 90px; background: var(--track); color: var(--fg);
+  border: 1px solid #4a443c; border-radius: 6px; padding: 6px 8px; font: inherit;
+}
+.field.checkbox { display: flex; align-items: flex-start; gap: 10px; }
+.field.checkbox input { margin-top: 3px; }
+.field.checkbox .desc { margin-bottom: 0; }
+
+.saved {
+  color: #7ec98f; font-size: 12px; opacity: 0; transition: opacity .2s;
+  height: 16px;
+}
+.saved.show { opacity: 1; }

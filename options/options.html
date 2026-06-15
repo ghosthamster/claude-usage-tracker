@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Claude Usage Tracker — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Claude Usage Tracker</h1>
+      <p class="sub">Settings are stored locally on this device.</p>
+
+      <label class="field">
+        <span class="title">Background refresh interval</span>
+        <span class="desc">How often to refresh, in minutes (randomized ±15%). 1–60.</span>
+        <input id="intervalMinutes" type="number" min="1" max="60" step="1" />
+      </label>
+
+      <label class="field checkbox">
+        <input id="pauseWhenIdle" type="checkbox" />
+        <span>
+          <span class="title">Pause when idle</span>
+          <span class="desc">Skip background refreshes while your computer is idle or locked.</span>
+        </span>
+      </label>
+
+      <label class="field checkbox">
+        <input id="backgroundFetchWhenNoTab" type="checkbox" />
+        <span>
+          <span class="title">Refresh even with no Claude tab open</span>
+          <span class="desc">If off, usage only updates while a Claude.ai tab is open (fewer requests).</span>
+        </span>
+      </label>
+
+      <label class="field">
+        <span class="title">Notify when a limit reaches</span>
+        <span class="desc">Show a notification at this % (0 disables notifications). 0–100.</span>
+        <input id="notifyThreshold" type="number" min="0" max="100" step="5" />
+      </label>
+
+      <p id="saved" class="saved">Saved</p>
+    </main>
+
+    <script src="../settings.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

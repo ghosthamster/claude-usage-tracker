@@ -37,6 +37,10 @@ Not affiliated with or endorsed by Anthropic.
 - **scripting** — To refresh usage, the extension runs a small one-line fetch of
   the usage endpoint inside an already-open Claude.ai tab (using your existing
   session). It is used only for this and only on Claude.ai.
+- **idle** — To pause background refreshes while the user's computer is idle or
+  locked, reducing unnecessary requests.
+- **notifications** — To optionally alert the user when one of their own usage
+  limits crosses a threshold they set. Off by configuration value 0.
 
 ## Data usage disclosures (Privacy practices tab)
 - Does the extension collect or use data? **No data is collected or transmitted.**

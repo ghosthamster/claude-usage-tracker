@@ -1,0 +1,10 @@
+{
+  "name": "claude-usage-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome/Brave extension showing Claude.ai subscription usage in the toolbar.",
+  "scripts": {
+    "test": "node test/usage-parse.test.js"
+  },
+  "license": "MIT"
+}
