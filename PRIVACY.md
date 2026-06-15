@@ -18,12 +18,29 @@ _Last updated: 2026-06-15_
 - There are **no analytics, no tracking, no accounts, and no remote servers.**
   The developer receives no data of any kind.
 
+### We do not sell or share your data
+
+We do not sell your data, share it with third parties, or use it for advertising,
+creditworthiness, lending, or any purpose unrelated to the single purpose of this
+extension (showing your own Claude.ai usage). No data is transferred off your
+device, so there is nothing to sell or share.
+
 ### Permissions
 
 - `host_permissions: https://claude.ai/*` — to read your usage from Claude.ai.
-- `storage` — to cache the latest usage locally.
+- `storage` — to cache the latest usage locally on your device.
 - `alarms` — to schedule an infrequent (≤ every 15 min) refresh.
+- `scripting` — to read the usage endpoint inside an already-open Claude.ai tab,
+  using your existing session. Used only for this, only on Claude.ai.
 
-### Contact
+### Changes
 
-Questions: open an issue on the project repository.
+If this policy changes, the "Last updated" date above will be revised and the new
+version published at the same URL.
+
+### Developer & contact
+
+Published by the developer of the open-source project
+**Claude Usage Tracker** (https://github.com/ghosthamster/claude-usage-tracker).
+Questions or concerns: open an issue on the repository, or email
+support@mpopovych.com.
