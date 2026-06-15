@@ -17,11 +17,12 @@ This extension does **not** track you and has **no servers**.
 - **All data stays local** in `chrome.storage.local` on your own machine.
 - **No cookie or token handling.** It reuses your existing Claude.ai login inside
   your browser; it never reads, stores, or transmits your credentials.
-- **It never makes a network request on its own.** It only ever *observes* the
-  usage data Claude.ai's own page loads, or asks an **already-open** Claude.ai tab
-  to read it using your live session.
 - **It reads exactly one endpoint** — `/api/organizations/{org}/usage` — and
   nothing else. Chat content and other traffic are never inspected.
+- **Background polling** runs on a randomized ~5-minute timer (jittered between 4
+  and 6 minutes). Each poll reads only your own usage endpoint — through an open
+  Claude.ai tab when one exists, otherwise via a direct request using your
+  existing login. Nothing is ever sent to any third party.
 - **Minimal permissions:** `storage`, `alarms`, `scripting`, and host access to
   `https://claude.ai/*` only. `scripting` is used solely to read the usage
   endpoint from an open Claude.ai tab. No `<all_urls>`, no `webRequest`, no `tabs`
@@ -34,9 +35,9 @@ This extension does **not** track you and has **no servers**.
    hands the result to the extension.
 2. The popup renders it as bars with reset times; the toolbar badge shows your
    highest utilization %.
-3. The manual refresh button (and an infrequent ~15-min timer) asks an open
-   Claude.ai tab to re-read usage. If no tab is open, it simply tells you to open
-   the usage page — it does not fetch anything in the background by itself.
+3. A randomized ~5-minute timer (and the manual refresh button) re-reads your
+   usage — through an open Claude.ai tab if one is available, otherwise via a
+   direct request to your own usage endpoint using your existing login.
 
 ### Components
 

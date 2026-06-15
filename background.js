@@ -1,23 +1,34 @@
 // Service worker: stores the latest usage reading and coordinates refreshes.
 //
-// Privacy & good-citizen posture:
-//   - The extension NEVER makes a network request on its own. It only ever asks
-//     an already-open Claude.ai tab to read your usage (your live session), or
-//     passively stores what the usage page already fetched.
+// Privacy posture:
+//   - Reads only your own usage endpoint (/api/organizations/{org}/usage) using
+//     the Claude.ai session you're already logged in to. No other traffic is read.
 //   - All data stays on this device in chrome.storage.local. Nothing is sent
-//     anywhere. There is no analytics, no tracking, no remote server.
+//     anywhere. No analytics, no tracking, no accounts, no remote server.
+//   - Background polling runs on a randomized ~5 min timer (see MIN/MAX). It
+//     refreshes through an open Claude.ai tab when possible, otherwise does a
+//     direct fetch of your own usage endpoint.
 
 importScripts("usage-parse.js"); // provides self.ClaudeUsage
 
-const REFRESH_MINUTES = 15;
+const MIN_MINUTES = 4; // randomized background interval, lower bound
+const MAX_MINUTES = 6; // ...upper bound (centers on ~5 min)
 const STORAGE_KEY = "usage";
 const META_KEY = "usageMeta"; // { url, capturedAt, source, lastError }
 
-chrome.runtime.onInstalled.addListener(ensureAlarm);
-chrome.runtime.onStartup.addListener(ensureAlarm);
-function ensureAlarm() {
-  chrome.alarms.create("refresh", { periodInMinutes: REFRESH_MINUTES });
+// --- Scheduling: a self-rescheduling one-shot alarm with a random delay, so the
+// polling interval is jittered rather than a fixed cadence. ---
+function scheduleNext() {
+  const minutes = MIN_MINUTES + Math.random() * (MAX_MINUTES - MIN_MINUTES);
+  chrome.alarms.create("refresh", { delayInMinutes: minutes });
 }
+
+chrome.runtime.onInstalled.addListener(scheduleNext);
+chrome.runtime.onStartup.addListener(scheduleNext);
+// Whenever the service worker spins up, make sure an alarm exists.
+chrome.alarms.get("refresh", (a) => {
+  if (!a) scheduleNext();
+});
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "USAGE_CAPTURED") {
@@ -30,12 +41,15 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 });
 
-// Periodic refresh is silent: it updates only if a Claude.ai tab is open, and
-// never surfaces an error if one isn't (no nagging when you're simply not on Claude).
+// Background tick: refresh silently (no error nagging), then reschedule.
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== "refresh") return;
-  const { [META_KEY]: meta } = await chrome.storage.local.get(META_KEY);
-  if (meta?.url) await refreshViaTab(meta); // ignore the result
+  try {
+    const { [META_KEY]: meta } = await chrome.storage.local.get(META_KEY);
+    if (meta?.url) await doRefresh(meta);
+  } finally {
+    scheduleNext();
+  }
 });
 
 async function save(data, meta) {
@@ -47,6 +61,16 @@ async function save(data, meta) {
 
 async function setError(meta, msg) {
   await chrome.storage.local.set({ [META_KEY]: { ...meta, lastError: msg } });
+}
+
+// Core refresh used by both the timer and the popup button:
+//   1) preferred: read via an open Claude.ai tab (its live session)
+//   2) fallback: direct fetch of the user's own usage endpoint
+async function doRefresh(meta) {
+  const viaTab = await refreshViaTab(meta);
+  if (viaTab.ok) return { ok: true };
+  if (await directFetch(meta)) return { ok: true };
+  return { ok: false, reason: viaTab.reason, error: viaTab.error };
 }
 
 // Reads usage from a live Claude.ai tab using that tab's own session. We inject
@@ -81,17 +105,32 @@ function readUsageInPage(url) {
     .catch((e) => ({ ok: false, error: String(e) }));
 }
 
+// Direct background fetch of the user's own usage endpoint. Cookies are attached
+// via host_permissions. May fail if Claude requires page context; that's fine —
+// the tab path covers the common case, and we just keep the last reading.
+async function directFetch(meta) {
+  try {
+    const r = await fetch(meta.url, { credentials: "include", headers: { accept: "application/json" } });
+    if (!r.ok) return false;
+    const data = await r.json();
+    await save(data, { ...meta, capturedAt: Date.now(), source: "background" });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 // User-initiated refresh (the popup button): surfaces actionable guidance.
 async function refresh() {
   const { [META_KEY]: meta } = await chrome.storage.local.get(META_KEY);
   if (!meta?.url) {
     return { ok: false, error: "Open claude.ai/settings/usage once so the extension can read your usage." };
   }
-  const r = await refreshViaTab(meta);
+  const r = await doRefresh(meta);
   if (r.ok) return { ok: true };
   const msg =
     r.reason === "no-tab"
-      ? "Open a Claude.ai tab to refresh your usage."
+      ? "Couldn't refresh in the background — open a Claude.ai tab and try again."
       : "Couldn't read usage from your Claude.ai tab: " + r.error;
   await setError(meta, msg);
   return { ok: false, error: msg };

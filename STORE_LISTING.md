@@ -32,8 +32,8 @@ Not affiliated with or endorsed by Anthropic.
   (`/api/organizations/{org}/usage`).
 - **storage** — To cache your latest usage locally so the popup loads instantly.
   Data never leaves your device.
-- **alarms** — To schedule an infrequent (every ~15 minutes) refresh, and only
-  when a Claude.ai tab is already open.
+- **alarms** — To schedule a periodic (~5 minutes, randomized) refresh of the
+  user's own usage so the toolbar stays current.
 - **scripting** — To refresh usage, the extension runs a small one-line fetch of
   the usage endpoint inside an already-open Claude.ai tab (using your existing
   session). It is used only for this and only on Claude.ai.

@@ -12,9 +12,10 @@ _Last updated: 2026-06-15_
 - The extension does **not** read, store, or transmit your cookies, authentication
   tokens, passwords, message contents, or any other Claude.ai data beyond the
   usage numbers shown in the popup.
-- The extension **never makes a network request on its own.** It only observes
-  data the Claude.ai page already loaded, or asks an already-open Claude.ai tab to
-  re-read usage using your existing login.
+- The extension refreshes your usage on a randomized ~5-minute timer (and when you
+  click refresh). Each refresh reads only your own usage endpoint — through an open
+  Claude.ai tab when one exists, otherwise via a direct request using your existing
+  login. No request is ever made to anyone other than Claude.ai.
 - There are **no analytics, no tracking, no accounts, and no remote servers.**
   The developer receives no data of any kind.
 
