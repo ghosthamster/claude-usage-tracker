@@ -34,6 +34,9 @@ Not affiliated with or endorsed by Anthropic.
   Data never leaves your device.
 - **alarms** — To schedule an infrequent (every ~15 minutes) refresh, and only
   when a Claude.ai tab is already open.
+- **scripting** — To refresh usage, the extension runs a small one-line fetch of
+  the usage endpoint inside an already-open Claude.ai tab (using your existing
+  session). It is used only for this and only on Claude.ai.
 
 ## Data usage disclosures (Privacy practices tab)
 - Does the extension collect or use data? **No data is collected or transmitted.**

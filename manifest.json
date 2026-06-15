@@ -3,7 +3,7 @@
   "name": "Claude Usage Tracker",
   "version": "0.1.0",
   "description": "See your Claude.ai subscription usage (session & weekly limits) at a glance, from your browser toolbar.",
-  "permissions": ["storage", "alarms"],
+  "permissions": ["storage", "alarms", "scripting"],
   "host_permissions": ["https://claude.ai/*"],
   "action": {
     "default_title": "Claude Usage",

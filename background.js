@@ -49,17 +49,36 @@ async function setError(meta, msg) {
   await chrome.storage.local.set({ [META_KEY]: { ...meta, lastError: msg } });
 }
 
-// Asks an open Claude.ai tab to read usage with its own session. Returns a
-// structured result; callers decide whether to surface failures to the user.
+// Reads usage from a live Claude.ai tab using that tab's own session. We inject
+// the fetch on demand (chrome.scripting) rather than relying on a pre-injected
+// content script, so it works even for tabs opened before the extension loaded.
 async function refreshViaTab(meta) {
   const tab = await firstClaudeTab();
   if (!tab) return { ok: false, reason: "no-tab" };
-  const res = await askTab(tab.id, meta.url);
-  if (res?.ok) {
-    await save(res.data, { ...meta, capturedAt: Date.now(), source: "tab" });
-    return { ok: true };
+  try {
+    const [inj] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      world: "MAIN", // page context => same-origin fetch with the live session
+      func: readUsageInPage,
+      args: [meta.url],
+    });
+    const res = inj?.result;
+    if (res?.ok) {
+      await save(res.data, { ...meta, capturedAt: Date.now(), source: "tab" });
+      return { ok: true };
+    }
+    return { ok: false, reason: "fetch-failed", error: res?.error || "no result" };
+  } catch (err) {
+    // e.g. the tab is discarded/unloaded and can't run a script right now.
+    return { ok: false, reason: "inject-failed", error: String(err) };
   }
-  return { ok: false, reason: res === null ? "no-content-script" : "fetch-failed", error: res?.error };
+}
+
+// Runs inside the Claude.ai page. Must be self-contained (no closure refs).
+function readUsageInPage(url) {
+  return fetch(url, { credentials: "include", headers: { accept: "application/json" } })
+    .then((r) => (r.ok ? r.json().then((data) => ({ ok: true, data })) : { ok: false, error: "HTTP " + r.status }))
+    .catch((e) => ({ ok: false, error: String(e) }));
 }
 
 // User-initiated refresh (the popup button): surfaces actionable guidance.
@@ -73,24 +92,19 @@ async function refresh() {
   const msg =
     r.reason === "no-tab"
       ? "Open a Claude.ai tab to refresh your usage."
-      : r.reason === "no-content-script"
-      ? "Reload your Claude.ai tab, then click refresh again."
-      : "Couldn't read usage from the Claude.ai tab: " + r.error;
+      : "Couldn't read usage from your Claude.ai tab: " + r.error;
   await setError(meta, msg);
   return { ok: false, error: msg };
 }
 
-function firstClaudeTab() {
-  return new Promise((resolve) =>
-    chrome.tabs.query({ url: "https://claude.ai/*" }, (tabs) => resolve(tabs && tabs[0]))
-  );
-}
-
-function askTab(tabId, url) {
-  return new Promise((resolve) =>
-    chrome.tabs.sendMessage(tabId, { type: "REFRESH_FROM_TAB", url }, (resp) =>
-      resolve(chrome.runtime.lastError ? null : resp)
-    )
+// Prefer a fully-loaded, non-discarded Claude.ai tab so the injected fetch runs.
+async function firstClaudeTab() {
+  const tabs = await chrome.tabs.query({ url: "https://claude.ai/*" });
+  if (!tabs.length) return null;
+  return (
+    tabs.find((t) => !t.discarded && t.status === "complete") ||
+    tabs.find((t) => !t.discarded) ||
+    tabs[0]
   );
 }
 

@@ -22,9 +22,10 @@ This extension does **not** track you and has **no servers**.
   to read it using your live session.
 - **It reads exactly one endpoint** — `/api/organizations/{org}/usage` — and
   nothing else. Chat content and other traffic are never inspected.
-- **Minimal permissions:** `storage`, `alarms`, and host access to
-  `https://claude.ai/*` only. No `<all_urls>`, no `webRequest`, no `tabs` content
-  access beyond Claude.ai.
+- **Minimal permissions:** `storage`, `alarms`, `scripting`, and host access to
+  `https://claude.ai/*` only. `scripting` is used solely to read the usage
+  endpoint from an open Claude.ai tab. No `<all_urls>`, no `webRequest`, no `tabs`
+  permission, no access to any site other than Claude.ai.
 
 ## How it works
 
